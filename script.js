@@ -2,7 +2,7 @@
 (() => {
   "use strict";
 
-  // Your family! Change Ashton's temporary colour when you find it out.
+  // Your family! Change Ashton's colour when you find it out.
   const PEOPLE = {
     Charliegh: "#F2C94C", // Yellow
     Tabitha: "#35B7AD",   // Teal
@@ -29,9 +29,14 @@
   let rotation = 0;
   let spinning = false;
 
+  const FULL_CIRCLE = Math.PI * 2;
+
   function loadMovies() {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const saved = JSON.parse(
+        localStorage.getItem(STORAGE_KEY) || "[]"
+      );
+
       if (!Array.isArray(saved)) return [];
 
       return saved.filter(movie =>
@@ -63,14 +68,24 @@
     })[char]);
   }
 
+  function announce(title, message) {
+    result.innerHTML = `
+      <p class="eyebrow">THE COUNCIL HAS SPOKEN</p>
+      <h2>${escapeHTML(title)}</h2>
+      <p>${escapeHTML(message)}</p>
+    `;
+  }
+
   function renderList() {
     const query = search.value.trim().toLowerCase();
     const selectedPerson = filter.value;
 
     const visible = movies.filter(movie =>
       (selectedPerson === "all" || movie.owner === selectedPerson) &&
-      (movie.title.toLowerCase().includes(query) ||
-       movie.owner.toLowerCase().includes(query))
+      (
+        movie.title.toLowerCase().includes(query) ||
+        movie.owner.toLowerCase().includes(query)
+      )
     );
 
     list.innerHTML = visible.map(movie => `
@@ -91,15 +106,18 @@
     empty.hidden = visible.length > 0;
 
     if (movies.length === 0) {
-      empty.textContent = "🍿 The list is empty! Add the family's first contenders above.";
+      empty.textContent =
+        "🍿 The list is empty! Add the family's first contenders above.";
     } else if (visible.length === 0) {
-      empty.textContent = "🔎 No movies found. Try another search or filter.";
+      empty.textContent =
+        "🔎 No movies found. Try another search or filter.";
     }
 
     $("count").textContent =
       `${movies.length} ${movies.length === 1 ? "movie" : "movies"}`;
 
     spinButton.disabled = spinning || movies.length === 0;
+
     drawWheel();
   }
 
@@ -112,18 +130,20 @@
 
     if (movies.length === 0) {
       ctx.beginPath();
-      ctx.arc(centre, centre, radius, 0, Math.PI * 2);
+      ctx.arc(centre, centre, radius, 0, FULL_CIRCLE);
       ctx.fillStyle = "#F5E8EB";
       ctx.fill();
+
       ctx.fillStyle = "#672F3A";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.font = "bold 32px sans-serif";
       ctx.fillText("ADD MOVIES 🍿", centre, centre);
+
       return;
     }
 
-    const slice = (Math.PI * 2) / movies.length;
+    const slice = FULL_CIRCLE / movies.length;
 
     ctx.save();
     ctx.translate(centre, centre);
@@ -137,13 +157,15 @@
       ctx.moveTo(0, 0);
       ctx.arc(0, 0, radius, start, end);
       ctx.closePath();
+
       ctx.fillStyle = PEOPLE[movie.owner];
       ctx.fill();
+
       ctx.strokeStyle = "#FFFCFA";
       ctx.lineWidth = movies.length > 35 ? 2 : 5;
       ctx.stroke();
 
-      // Text gets hidden on very crowded wheels to keep it legible.
+      // Hide labels when the wheel gets too crowded.
       if (movies.length <= 24) {
         ctx.save();
         ctx.rotate(start + slice / 2);
@@ -152,6 +174,7 @@
 
         let label = movie.title;
         const maxLength = movies.length > 12 ? 12 : 19;
+
         if (label.length > maxLength) {
           label = label.slice(0, maxLength - 1) + "…";
         }
@@ -159,7 +182,9 @@
         ctx.fillStyle = "#30262A";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = `bold ${Math.max(12, Math.min(23, 260 / movies.length + 6))}px sans-serif`;
+        ctx.font =
+          `bold ${Math.max(12, Math.min(23, 260 / movies.length + 6))}px sans-serif`;
+
         ctx.fillText(label, 0, 0, radius * 0.72);
         ctx.restore();
       }
@@ -168,36 +193,41 @@
     ctx.restore();
   }
 
-  function announce(title, message) {
-    result.innerHTML = `
-      <p class="eyebrow">THE COUNCIL HAS SPOKEN</p>
-      <h2>${escapeHTML(title)}</h2>
-      <p>${escapeHTML(message)}</p>
-    `;
-  }
-
   function spin() {
     if (spinning || movies.length === 0) return;
 
     spinning = true;
     spinButton.disabled = true;
-    announce("The wheel is deciding…", "No lobbying the wheel, please.");
 
-    const full = Math.PI * 2;
-    const slice = full / movies.length;
+    announce(
+      "The wheel is deciding…",
+      "No lobbying the wheel, please."
+    );
 
-    // Aim the centre of the selected slice at the pointer.
+    // Keep the current movie order fixed throughout the spin.
+    const spinningMovies = [...movies];
+    const slice = FULL_CIRCLE / spinningMovies.length;
+
+    // Randomly choose a movie and aim its slice centre at the top pointer.
+    const selectedIndex = Math.floor(
+      Math.random() * spinningMovies.length
+    );
+
     const target = -(selectedIndex + 0.5) * slice;
-    const current = ((rotation % full) + full) % full;
-    const targetNormal = ((target % full) + full) % full;
+    const current = ((rotation % FULL_CIRCLE) + FULL_CIRCLE) % FULL_CIRCLE;
+    const targetNormal = ((target % FULL_CIRCLE) + FULL_CIRCLE) % FULL_CIRCLE;
+
     const distance =
-      (6 + Math.random() * 2) * full +
-      ((targetNormal - current + full) % full);
+      (6 + Math.random() * 2) * FULL_CIRCLE +
+      ((targetNormal - current + FULL_CIRCLE) % FULL_CIRCLE);
 
     const start = rotation;
     const end = start + distance;
+
     const duration = matchMedia("(prefers-reduced-motion: reduce)").matches
-      ? 300 : 4800;
+      ? 300
+      : 4800;
+
     const startTime = performance.now();
 
     function animate(now) {
@@ -212,15 +242,20 @@
         return;
       }
 
-      rotation = ((end % full) + full) % full;
+      // Finish at the exact final angle.
+      rotation = ((end % FULL_CIRCLE) + FULL_CIRCLE) % FULL_CIRCLE;
       drawWheel();
+
+      // The pointer is at the top. Work out which slice is under it.
+      const pointerAngle =
+        ((-rotation % FULL_CIRCLE) + FULL_CIRCLE) % FULL_CIRCLE;
+
+      const actualIndex = Math.floor(pointerAngle / slice);
+      const winner = spinningMovies[actualIndex];
+
+      // Stop the animation before updating the list.
       spinning = false;
 
-      
-      const slice = full / movies.length;
-const pointerAngle = ((-rotation % full) + full) % full;
-const selectedIndex = Math.floor(pointerAngle / slice);
-const winner = movies[selectedIndex];
       announce(
         `🎉 ${winner.title}`,
         `${winner.owner}'s pick! Start preparing the popcorn.`
@@ -229,15 +264,17 @@ const winner = movies[selectedIndex];
       result.style.background = PEOPLE[winner.owner] + "35";
       result.style.borderColor = PEOPLE[winner.owner];
 
-      // Automatically remove the winning movie from the mega-list.
+      // Remove only the movie that actually won.
       movies = movies.filter(movie => movie.id !== winner.id);
+
       saveMovies();
       renderList();
-
+    }
 
     requestAnimationFrame(animate);
   }
 
+  // Add a new movie.
   form.addEventListener("submit", event => {
     event.preventDefault();
 
@@ -246,14 +283,17 @@ const winner = movies[selectedIndex];
 
     if (!title || !Object.hasOwn(PEOPLE, owner)) return;
 
-    // Stop the exact same person adding the exact same title twice.
+    // Prevent the same person submitting the same title twice.
     const duplicate = movies.some(movie =>
       movie.owner === owner &&
       movie.title.toLowerCase() === title.toLowerCase()
     );
 
     if (duplicate) {
-      announce("Already on the list!", `${owner} has already submitted ${title}.`);
+      announce(
+        "Already on the list!",
+        `${owner} has already submitted ${title}.`
+      );
       return;
     }
 
@@ -262,16 +302,23 @@ const winner = movies[selectedIndex];
       : `${Date.now()}-${Math.random()}`;
 
     movies.push({ id, title, owner });
+
     saveMovies();
     renderList();
 
     titleInput.value = "";
     titleInput.focus();
-    announce("New contender added!", `${title} joins ${owner}'s picks.`);
+
+    announce(
+      "New contender added!",
+      `${title} joins ${owner}'s picks.`
+    );
+
     result.style.background = "";
     result.style.borderColor = "";
   });
 
+  // Manually remove a movie.
   list.addEventListener("click", event => {
     const button = event.target.closest("[data-id]");
     if (!button) return;
@@ -280,29 +327,43 @@ const winner = movies[selectedIndex];
     if (!movie) return;
 
     movies = movies.filter(item => item.id !== movie.id);
+
     saveMovies();
     renderList();
+
     announce("Movie removed", `${movie.title} has left the council.`);
+
     result.style.background = "";
     result.style.borderColor = "";
   });
 
+  // Clear the entire list.
   $("clear").addEventListener("click", () => {
     if (!movies.length) return;
 
-    if (confirm("Delete every movie in the mega-list? This cannot be undone.")) {
+    if (confirm(
+      "Delete every movie in the mega-list? This cannot be undone."
+    )) {
       movies = [];
+
       saveMovies();
       renderList();
-      announce("A fresh start!", "The council awaits new submissions.");
+
+      announce(
+        "A fresh start!",
+        "The council awaits new submissions."
+      );
+
       result.style.background = "";
       result.style.borderColor = "";
     }
   });
 
+  // Search, filter, and spin controls.
   search.addEventListener("input", renderList);
   filter.addEventListener("change", renderList);
   spinButton.addEventListener("click", spin);
 
+  // Draw the saved list on startup.
   renderList();
 })();
