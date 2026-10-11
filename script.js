@@ -217,6 +217,7 @@
       drawWheel();
       spinning = false;
 
+      
       const winner = movies[selectedIndex];
       announce(
         `🎉 ${winner.title}`,
@@ -225,8 +226,12 @@
 
       result.style.background = PEOPLE[winner.owner] + "35";
       result.style.borderColor = PEOPLE[winner.owner];
-      spinButton.disabled = movies.length === 0;
-    }
+
+      // Automatically remove the winning movie from the mega-list.
+      movies = movies.filter(movie => movie.id !== winner.id);
+      saveMovies();
+      renderList();
+
 
     requestAnimationFrame(animate);
   }
