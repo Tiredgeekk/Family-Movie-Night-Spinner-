@@ -185,7 +185,6 @@
 
     const full = Math.PI * 2;
     const slice = full / movies.length;
-    const selectedIndex = Math.floor(Math.random() * movies.length);
 
     // Aim the centre of the selected slice at the pointer.
     const target = -(selectedIndex + 0.5) * slice;
@@ -218,7 +217,10 @@
       spinning = false;
 
       
-      const winner = movies[selectedIndex];
+      const slice = full / movies.length;
+const pointerAngle = ((-rotation % full) + full) % full;
+const selectedIndex = Math.floor(pointerAngle / slice);
+const winner = movies[selectedIndex];
       announce(
         `🎉 ${winner.title}`,
         `${winner.owner}'s pick! Start preparing the popcorn.`
