@@ -1,0 +1,105 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#672F3A">
+  <title>Family Movie Night Roulette 🍿</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <p class="eyebrow">THE FAMILY FILM COUNCIL PRESENTS</p>
+      <h1>🎬 Movie Night Roulette</h1>
+      <p>Four people. One mega-list. Zero decision-making skills required.</p>
+    </header>
+
+    <section class="panel wheel-panel">
+      <div class="heading">
+        <div>
+          <p class="eyebrow">THE GREAT DECIDER</p>
+          <h2>Let fate decide!</h2>
+        </div>
+        <span id="count" class="pill">0 movies</span>
+      </div>
+
+      <div class="wheel-wrap">
+        <div class="pointer"></div>
+        <canvas id="wheel" width="800" height="800">
+          Your browser does not support the wheel.
+        </canvas>
+        <div class="hub">🎬</div>
+      </div>
+
+      <button id="spin" class="button primary" disabled>
+        🎡 SPIN THE WHEEL!
+      </button>
+
+      <section id="result" class="result" aria-live="polite">
+        <p class="eyebrow">THE COUNCIL AWAITS</p>
+        <h2>Your next movie awaits...</h2>
+        <p>Add a few movies to begin!</p>
+      </section>
+    </section>
+
+    <section class="panel list-panel">
+      <p class="eyebrow">THE CONTENDERS</p>
+      <h2>Movie mega-list 🍿</h2>
+      <p class="muted">Add a movie now. Spin whenever movie night arrives.</p>
+
+      <form id="movie-form">
+        <label for="movie-title">Movie title</label>
+        <input id="movie-title" maxlength="100"
+          placeholder="e.g. The Princess Bride" required>
+
+        <label for="movie-owner">Who recommended it?</label>
+        <select id="movie-owner">
+          <option>Charliegh</option>
+          <option>Tabitha</option>
+          <option>Ezra</option>
+          <option>Ashton</option>
+        </select>
+
+        <button class="button primary" type="submit">
+          ＋ Add to mega-list
+        </button>
+      </form>
+
+      <div class="tools">
+        <label for="search">Search the list</label>
+        <input id="search" type="search"
+          placeholder="Find a title or person...">
+
+        <label for="filter">Filter by person</label>
+        <select id="filter">
+          <option value="all">Everyone's movies</option>
+          <option>Charliegh</option>
+          <option>Tabitha</option>
+          <option>Ezra</option>
+          <option>Ashton</option>
+        </select>
+      </div>
+
+      <ul id="movie-list"></ul>
+      <p id="empty" class="empty">
+        🍿 The list is empty! Add the family's first contenders above.
+      </p>
+
+      <button id="clear" class="button quiet" type="button">
+        Clear entire list
+      </button>
+      <p class="muted small">
+        Saved in this browser on this device.
+      </p>
+    </section>
+
+    <footer>
+      ✨ THE WHEEL HAS SPOKEN ✨
+      <p>Arguing with the wheel is strictly forbidden.</p>
+    </footer>
+  </main>
+</body>
+</html>
